@@ -11,7 +11,16 @@
 
 
  <div id="background-icons"></div>
-
+    <form id="activity-form">
+      <input type="text" id="activity-name" placeholder="Activity name" required />
+      <input type="number" id="activity-co2" placeholder="CO₂ (kg)" step="0.1" required />
+      <select id="activity-category">
+        <option value="transport">Transport</option>
+        <option value="food">Food</option>
+        <option value="energy">Energy</option>
+      </select>
+      <button type="submit">Add Activity</button>
+    </form>
   <div class="container">
 
 
