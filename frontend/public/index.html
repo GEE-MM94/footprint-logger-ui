@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CO₂ Tracker Dashboard</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>CO₂ Tracker</h1>
+
+      <div id="auth">
+        <input type="text" id="username" placeholder="Username" />
+        <input type="password" id="password" placeholder="Password" />
+        <button id="login">Login</button>
+        <button id="register">Register</button>
+      </div>
+
+      <div id="dashboard" style="display: none">
+        <button id="logout">Logout</button>
+        <h2>Welcome, <span id="user-name"></span></h2>
+        <p>Total CO₂: <span id="total-co2">0.00</span> kg</p>
+        <canvas id="weekly-chart" height="100"></canvas>
+        <h3>Add Activity</h3>
+        <input type="text" id="activity" placeholder="Activity" />
+        <input type="number" id="co2" placeholder="CO₂ (kg)" />
+        <input type="text" id="category" placeholder="Category" />
+        <input type="date" id="date" />
+        <button id="add-activity">Add</button>
+
+        <h3>Leaderboard</h3>
+        <ul id="leaderboard"></ul>
+
+        <h3>Average CO₂ of All Users</h3>
+        <p id="average"></p>
+      </div>
+    </div>
+
+    <script src="/script.js"></script>
+  </body>
+</html>
