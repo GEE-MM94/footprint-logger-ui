@@ -1,3 +1,4 @@
+/*jshint esversion: 8 */
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
@@ -18,3 +19,5 @@ app.use("/api/auth", authRoutes);
 app.use("/api/activities", activityRoutes);
 
 app.listen(process.env.PORT || 5000);
+const PORT = process.env.PORT;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
