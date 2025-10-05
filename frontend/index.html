@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily CO₂ Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>
+        Daily <span style="color: red"><i>C</i></span
+        ><span style="color: green"><i>O₂</i></span> Emissions Tracker
+      </h1>
+
+      <form id="activity-form">
+        <select id="activity"></select>
+        <input type="text" id="new-activity" placeholder="Add new activity" />
+        <input
+          type="number"
+          id="activity-co2"
+          placeholder="CO₂ (kg)"
+          step="0.1"
+          min="0"
+          required
+        />
+        <button type="submit">Add Activity</button>
+        <button type="button" id="reset-data" style="margin-left: 10px">
+          Reset All Data
+        </button>
+      </form>
+
+      <div class="controls">
+        <div class="filters">
+          <label>Filter by Activity:</label>
+          <div class="dropdown" id="activity-dropdown">
+            <div class="dropdown-toggle">Select Activities ▼</div>
+            <div class="dropdown-content">
+              <div id="activity-checkboxes" class="checkbox-group"></div>
+              <div class="dropdown-buttons">
+                <button type="button" id="select-all">Select All</button>
+                <button type="button" id="clear-all">Clear All</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-controls">
+          <label>Chart Type:</label>
+          <select id="chart-type">
+            <option value="pie">Pie</option>
+            <option value="bar">Bar</option>
+          </select>
+
+          <label>
+            <input type="checkbox" id="toggle-details" />
+            Show Details
+          </label>
+        </div>
+      </div>
+
+      <h2 id="total-co2-container" style="display: block">
+        <i> Total CO₂</i>: <span id="total-co2">0.00</span> kg
+      </h2>
+
+      <ul id="activity-list"></ul>
+
+      <canvas
+        id="co2-chart"
+        class="tilt"
+        width="768"
+        height="768"
+        style="
+          display: block;
+          box-sizing: border-box;
+          height: 640px;
+          width: 640px;
+        "
+      ></canvas>
+    </div>
+
+    <footer>
+      <p>Made by GEE-MM94</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
