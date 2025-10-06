@@ -5,24 +5,16 @@ require("./models/db");
 
 const authRoutes = require("./routes/authRoutes");
 const activityRoutes = require("./routes/activityRoutes");
-const pinoLogger = require("./logger.js");
 
 dotenv.config();
 
 const app = express();
 
-//app.use(pinoHttp({ logger }));
-
 app.use(cors());
-//app.use("*", cors());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/activity", activityRoutes);
-const pinoHttp = require("pino-http");
-const logger = require("./logger.js");
-
-//app.use(pinoHttp({ logger }));
 
 app.use((err, req, res, next) => {
   console.error(err);
