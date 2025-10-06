@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const dotenv = require("dotenv");
 require("./models/db");
 
@@ -21,8 +22,10 @@ app.use((err, req, res, next) => {
   res.status(500).send("Internal Server Error");
 });
 
+app.use(express.static(path.join(__dirname, "../frontend")));
+
 app.get("/", (req, res) => {
-  res.send("Inside the server");
+  res.sendFile(path.join(__dirname, "frontend", "index.html"));
 });
 
 const PORT = process.env.PORT || 5000;
