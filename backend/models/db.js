@@ -1,10 +1,7 @@
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-dotenv.config();
+require("dotenv").config();
 
-const url = process.env.MONGO_URL;
-
-console.log("CONNECTING :", process.env.MONGO_URL);
+const url = process.env.MONGO_URI;
 
 mongoose.connect(url, {
   dbName: "footprintloggerdb",
