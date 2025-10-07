@@ -6,7 +6,6 @@ const url = process.env.MONGO_URI;
 mongoose.connect(url, {
   dbName: "footprintloggerdb",
   useNewUrlParser: true,
-  useUnifiedTopology: true,
 });
 
 const db = mongoose.connection;
