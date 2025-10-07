@@ -1,18 +1,19 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const mongoose = require("../models/db");
+const { connectDB } = require("../models/db");
 
 const router = express.Router();
 
-const activitySchema = new mongoose.Schema({
-  userId: String,
-  activity: String,
-  co2: Number,
-  category: String,
-  date: String,
-});
+let activitiesCollection;
 
-const Activity = mongoose.model("Activity", activitySchema);
+(async () => {
+  try {
+    const db = await connectDB();
+    activitiesCollection = db.collection("activities");
+  } catch (err) {
+    console.error("Failed to connect to DB in activity route:", err);
+  }
+})();
 
 function authMiddleware(req, res, next) {
   const token = req.headers.authorization?.split(" ")[1];
@@ -28,41 +29,57 @@ function authMiddleware(req, res, next) {
 
 router.post("/add", authMiddleware, async (req, res) => {
   const { activity, co2, category, date } = req.body;
+
+  if (!activitiesCollection)
+    return res.status(500).json({ message: "DB not ready" });
+
   try {
-    const newActivity = new Activity({
+    const newActivity = {
       userId: req.userId,
       activity,
       co2,
       category,
       date,
-    });
-    await newActivity.save();
+    };
+    await activitiesCollection.insertOne(newActivity);
     res.status(201).json({ message: "Activity saved" });
-  } catch {
+  } catch (err) {
+    console.error("Error saving activity:", err);
     res.status(500).json({ message: "Error saving activity" });
   }
 });
 
 router.get("/my", authMiddleware, async (req, res) => {
+  if (!activitiesCollection)
+    return res.status(500).json({ message: "DB not ready" });
+
   try {
-    const logs = await Activity.find({ userId: req.userId });
+    const logs = await activitiesCollection
+      .find({ userId: req.userId })
+      .toArray();
     const total = logs.reduce((sum, a) => sum + a.co2, 0);
     res.json({ logs, total });
-  } catch {
+  } catch (err) {
+    console.error("Error fetching logs:", err);
     res.status(500).json({ message: "Error fetching logs" });
   }
 });
 
 router.get("/weekly-summary", authMiddleware, async (req, res) => {
+  if (!activitiesCollection)
+    return res.status(500).json({ message: "DB not ready" });
+
   try {
     const now = new Date();
     const pastWeek = new Date();
     pastWeek.setDate(now.getDate() - 7);
 
-    const logs = await Activity.find({
-      userId: req.userId,
-      date: { $gte: pastWeek.toISOString().split("T")[0] },
-    });
+    const logs = await activitiesCollection
+      .find({
+        userId: req.userId,
+        date: { $gte: pastWeek.toISOString().split("T")[0] },
+      })
+      .toArray();
 
     const daily = {};
     logs.forEach(({ date, co2 }) => {
@@ -70,31 +87,42 @@ router.get("/weekly-summary", authMiddleware, async (req, res) => {
     });
 
     res.json({ daily });
-  } catch {
+  } catch (err) {
+    console.error("Error getting summary:", err);
     res.status(500).json({ message: "Error getting summary" });
   }
 });
 
 router.get("/average-emissions", async (req, res) => {
+  if (!activitiesCollection)
+    return res.status(500).json({ message: "DB not ready" });
+
   try {
-    const allLogs = await Activity.find();
+    const allLogs = await activitiesCollection.find().toArray();
+
     const userMap = {};
     allLogs.forEach(({ userId, co2 }) => {
       userMap[userId] = (userMap[userId] || 0) + co2;
     });
+
     const values = Object.values(userMap);
     const avg = values.reduce((a, b) => a + b, 0) / values.length || 0;
+
     res.json({ average: avg.toFixed(2) });
-  } catch {
+  } catch (err) {
+    console.error("Error calculating average:", err);
     res.status(500).json({ message: "Error calculating average" });
   }
 });
 
 router.get("/leaderboard", async (req, res) => {
-  try {
-    const allLogs = await Activity.find();
-    const userMap = {};
+  if (!activitiesCollection)
+    return res.status(500).json({ message: "DB not ready" });
 
+  try {
+    const allLogs = await activitiesCollection.find().toArray();
+
+    const userMap = {};
     allLogs.forEach(({ userId, co2 }) => {
       userMap[userId] = (userMap[userId] || 0) + co2;
     });
@@ -109,7 +137,8 @@ router.get("/leaderboard", async (req, res) => {
         total: total.toFixed(2),
       })),
     });
-  } catch {
+  } catch (err) {
+    console.error("Error building leaderboard:", err);
     res.status(500).json({ message: "Error building leaderboard" });
   }
 });

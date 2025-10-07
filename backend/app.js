@@ -2,7 +2,15 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const dotenv = require("dotenv");
-require("./models/db");
+const { connectDB } = require("./models/db");
+
+async function start() {
+  const db = await connectDB();
+  const users = await db.collection("users").find().toArray();
+  console.log(users);
+}
+
+start();
 
 const authRoutes = require("./routes/authRoutes");
 const activityRoutes = require("./routes/activityRoutes");
