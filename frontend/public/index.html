@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CO₂ Activity Tracker</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="../static/style.css" />
   </head>
   <body>
     <h1>
@@ -34,6 +34,7 @@
         <input type="date" id="activity-date" />
       </div>
       <button type="submit">Add Activity</button>
+      <button type="button" id="reset-data">Reset All Data</button>
     </form>
 
     <div class="controls">
@@ -59,15 +60,11 @@
         </select>
       </div>
 
-      <button id="select-all">Select All</button>
-      <button id="clear-all">Clear All</button>
-      <button id="reset-data">Reset All Data</button>
-    </div>
-
-    <div class="dropdown" id="activity-dropdown">
-      <button class="dropdown-toggle">☰ Menu</button>
-      <div class="dropdown-menu">
-        <p>Extra settings could go here</p>
+      <div>
+        <label for="activity-filter">Filter by Activity:</label>
+        <select id="activity-filter">
+          <option value="all">All</option>
+        </select>
       </div>
     </div>
 
@@ -86,6 +83,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="script.js"></script>
+    <script src="../script.js"></script>
   </body>
 </html>

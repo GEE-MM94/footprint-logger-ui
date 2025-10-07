@@ -47,15 +47,11 @@ const chartTypeSelect = document.getElementById("chart-type");
 const toggleDetails = document.getElementById("toggle-details");
 const chartCanvas = document.getElementById("co2-chart");
 const resetButton = document.getElementById("reset-data");
-const checkboxContainer = document.getElementById("activity-checkboxes");
-const selectAllButton = document.getElementById("select-all");
-const clearAllButton = document.getElementById("clear-all");
-const dropdown = document.getElementById("activity-dropdown");
-const dropdownToggle = dropdown.querySelector(".dropdown-toggle");
 const categoryFilter = document.getElementById("category-filter");
 const categorySelect = document.getElementById("category-select");
 const newCategoryInput = document.getElementById("new-category");
 const dateInput = document.getElementById("activity-date");
+const activityFilter = document.getElementById("activity-filter");
 
 let chart;
 
@@ -94,46 +90,41 @@ function renderCategorySelect() {
   });
 }
 
-function renderActivityOptions() {
+function renderActivitySelect() {
   activitySelect.innerHTML = "";
   const selectOption = document.createElement("option");
   selectOption.value = "";
   selectOption.textContent = "Select";
   activitySelect.appendChild(selectOption);
-  checkboxContainer.innerHTML = "";
   activityTypes.forEach((act) => {
     const option = document.createElement("option");
     option.value = act;
     option.textContent = act;
     activitySelect.appendChild(option);
-    const label = document.createElement("label");
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = act;
-    checkbox.checked = true;
-    checkbox.addEventListener("change", () => renderList());
-    label.appendChild(checkbox);
-    label.appendChild(document.createTextNode(` ${act}`));
-    checkboxContainer.appendChild(label);
+  });
+
+  activityFilter.innerHTML = `<option value="all">All</option>`;
+  activityTypes.forEach((act) => {
+    const opt = document.createElement("option");
+    opt.value = act;
+    opt.textContent = act;
+    activityFilter.appendChild(opt);
   });
 }
 
 function renderList() {
-  const checkedActivities = Array.from(
-    checkboxContainer.querySelectorAll("input[type='checkbox']:checked")
-  ).map((cb) => cb.value);
+  const selectedActivity = activityFilter.value;
   const selectedCategory = categoryFilter.value;
   const filtered = activities.filter((a) => {
+    const matchesActivity =
+      selectedActivity === "all" || a.activity === selectedActivity;
     const matchesCategory =
       selectedCategory === "all" ||
       activityCategories[a.activity] === selectedCategory;
-    return checkedActivities.includes(a.activity) && matchesCategory;
+    return matchesActivity && matchesCategory;
   });
   totalContainer.style.display =
-    checkedActivities.length === activityTypes.length &&
-    selectedCategory === "all"
-      ? "block"
-      : "none";
+    selectedActivity === "all" && selectedCategory === "all" ? "block" : "none";
   activityList.innerHTML = "";
   if (toggleDetails.checked) {
     filtered.forEach((activity) => {
@@ -173,53 +164,22 @@ function updateChart(data) {
         tension: 0.2,
       };
     });
-    const today = new Date();
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
-    const weekStartIndex = allDates.findIndex(
-      (d) => new Date(d) >= startOfWeek
-    );
-    const scrollIndex = Math.max(weekStartIndex - 3, 0);
     chart = new Chart(chartCanvas.getContext("2d"), {
       type: "line",
-      data: {
-        labels: allDates,
-        datasets,
-      },
+      data: { labels: allDates, datasets },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        interaction: {
-          mode: "nearest",
-          axis: "x",
-          intersect: false,
-        },
-        plugins: {
-          legend: { position: "top" },
-        },
+        interaction: { mode: "nearest", axis: "x", intersect: false },
+        plugins: { legend: { position: "top" } },
         scales: {
           x: { title: { display: true, text: "Date" } },
           y: { beginAtZero: true, title: { display: true, text: "CO₂ (kg)" } },
         },
       },
-      plugins: [
-        {
-          id: "scrollToWeek",
-          afterRender: (chartInstance) => {
-            const chartArea = chartInstance.chartArea;
-            const xAxis = chartInstance.scales.x;
-            if (xAxis && xAxis.getPixelForTick) {
-              const scrollPixel = xAxis.getPixelForTick(scrollIndex);
-              chartCanvas.parentElement.scrollLeft =
-                scrollPixel - chartArea.width / 2;
-            }
-          },
-        },
-      ],
     });
     return;
   }
-
   const activitySums = data.reduce((acc, a) => {
     acc[a.activity] = (acc[a.activity] || 0) + a.co2;
     return acc;
@@ -241,9 +201,7 @@ function updateChart(data) {
     },
     options: {
       responsive: true,
-      plugins: {
-        legend: { position: "top" },
-      },
+      plugins: { legend: { position: "top" } },
     },
   });
 }
@@ -274,7 +232,7 @@ form.addEventListener("submit", (e) => {
     date: selectedDate || new Date().toISOString().split("T")[0],
   });
   saveToLocalStorage();
-  renderActivityOptions();
+  renderActivitySelect();
   renderCategorySelect();
   renderList();
   form.reset();
@@ -289,6 +247,7 @@ activitySelect.addEventListener("change", () => {
 chartTypeSelect.addEventListener("change", renderList);
 toggleDetails.addEventListener("change", renderList);
 categoryFilter.addEventListener("change", renderList);
+activityFilter.addEventListener("change", renderList);
 
 resetButton.addEventListener("click", () => {
   if (confirm("Are you sure you want to reset all data?")) {
@@ -301,34 +260,10 @@ resetButton.addEventListener("click", () => {
       "electricity use": "energy",
     };
     saveToLocalStorage();
-    renderActivityOptions();
+    renderActivitySelect();
     renderCategorySelect();
     renderList();
     setDefaultDate();
-  }
-});
-
-selectAllButton.addEventListener("click", () => {
-  checkboxContainer.querySelectorAll("input[type='checkbox']").forEach((cb) => {
-    cb.checked = true;
-  });
-  renderList();
-});
-
-clearAllButton.addEventListener("click", () => {
-  checkboxContainer.querySelectorAll("input[type='checkbox']").forEach((cb) => {
-    cb.checked = false;
-  });
-  renderList();
-});
-
-dropdownToggle.addEventListener("click", () => {
-  dropdown.classList.toggle("show");
-});
-
-document.addEventListener("click", (e) => {
-  if (!dropdown.contains(e.target)) {
-    dropdown.classList.remove("show");
   }
 });
 
@@ -337,7 +272,7 @@ function setDefaultDate() {
   dateInput.value = today;
 }
 
-renderActivityOptions();
+renderActivitySelect();
 renderCategorySelect();
 setDefaultDate();
 renderList();
