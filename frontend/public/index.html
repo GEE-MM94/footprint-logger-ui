@@ -4,13 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CO₂ Activity Tracker</title>
-    <link rel="stylesheet" href="../static/style.css" />
+    <link rel="stylesheet" href="../static/css/style.css" />
   </head>
   <body>
     <h1>
       Daily <span style="color: red"><i>C</i></span
       ><span style="color: green"><i>O₂</i></span> Emissions Tracker
     </h1>
+
+    <div class="user-section">
+      <div class="user-icon" id="user-icon">
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
+          alt="User Icon"
+        />
+        <span id="username">Username</span>
+        <div class="dropdown" id="user-dropdown">
+          <button id="logout-btn">Logout</button>
+        </div>
+      </div>
+    </div>
 
     <form id="activity-form">
       <div>
@@ -83,6 +96,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="../script.js"></script>
+    <script src="../static/js/script.js"></script>
   </body>
 </html>

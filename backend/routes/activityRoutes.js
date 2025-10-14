@@ -19,7 +19,10 @@ function authMiddleware(req, res, next) {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.sendStatus(401);
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "defaultsecret"
+    );
     req.userId = decoded.userId;
     next();
   } catch {
@@ -27,8 +30,12 @@ function authMiddleware(req, res, next) {
   }
 }
 
-router.post("/add", authMiddleware, async (req, res) => {
+router.post("/activities/add", authMiddleware, async (req, res) => {
   const { activity, co2, category, date } = req.body;
+
+  if (!activity || typeof co2 !== "number" || !category || !date) {
+    return res.status(400).json({ message: "Invalid input data." });
+  }
 
   if (!activitiesCollection)
     return res.status(500).json({ message: "DB not ready" });
@@ -49,7 +56,7 @@ router.post("/add", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/my", authMiddleware, async (req, res) => {
+router.get("/activities/my", authMiddleware, async (req, res) => {
   if (!activitiesCollection)
     return res.status(500).json({ message: "DB not ready" });
 
@@ -58,14 +65,14 @@ router.get("/my", authMiddleware, async (req, res) => {
       .find({ userId: req.userId })
       .toArray();
     const total = logs.reduce((sum, a) => sum + a.co2, 0);
-    res.json({ logs, total });
+    res.json({ logs, total: total.toFixed(2) });
   } catch (err) {
     console.error("Error fetching logs:", err);
     res.status(500).json({ message: "Error fetching logs" });
   }
 });
 
-router.get("/weekly-summary", authMiddleware, async (req, res) => {
+router.get("/activities/weekly-summary", authMiddleware, async (req, res) => {
   if (!activitiesCollection)
     return res.status(500).json({ message: "DB not ready" });
 
@@ -93,7 +100,7 @@ router.get("/weekly-summary", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/average-emissions", async (req, res) => {
+router.get("/activities/average-emissions", async (req, res) => {
   if (!activitiesCollection)
     return res.status(500).json({ message: "DB not ready" });
 
@@ -115,7 +122,7 @@ router.get("/average-emissions", async (req, res) => {
   }
 });
 
-router.get("/leaderboard", async (req, res) => {
+router.get("/activities/leaderboard", async (req, res) => {
   if (!activitiesCollection)
     return res.status(500).json({ message: "DB not ready" });
 
@@ -141,6 +148,26 @@ router.get("/leaderboard", async (req, res) => {
     console.error("Error building leaderboard:", err);
     res.status(500).json({ message: "Error building leaderboard" });
   }
+});
+
+const defaultActivityData = {
+  "car travel": 2.3,
+  "meat consumption": 5.0,
+  "electricity use": 1.2,
+};
+
+const activityCategories = {
+  "car travel": "transport",
+  "meat consumption": "food",
+  "electricity use": "energy",
+};
+
+router.get("/activity-types", (req, res) => {
+  res.json({ types: Object.keys(defaultActivityData) });
+});
+
+router.get("/activity-categories", (req, res) => {
+  res.json({ categories: activityCategories });
 });
 
 module.exports = router;

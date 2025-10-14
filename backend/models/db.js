@@ -2,7 +2,7 @@ const { MongoClient, ServerApiVersion } = require("mongodb");
 require("dotenv").config();
 
 const uri = process.env.MONGO_URI;
-const dbName = "footprintloggerdb";
+const dbName = process.env.DB_NAME;
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -20,9 +20,8 @@ async function connectDB() {
     }
 
     const db = client.db(dbName);
-    console.log("Connected to MongoDB");
 
-    client.once("close", () => console.log("🔌 MongoDB connection closed"));
+    client.once("close", () => console.log("MongoDB connection closed"));
     client.once("error", (err) =>
       console.error("MongoDB connection error:", err)
     );

@@ -1,3 +1,19 @@
+function getToken() {
+  return localStorage.getItem("token");
+}
+
+function parseJwt(token) {
+  try {
+    const payload = token.split(".")[1];
+    const decoded = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+    return JSON.parse(decoded);
+  } catch {
+    return null;
+  }
+}
+
+const token = getToken();
+
 const defaultActivityData = JSON.parse(
   localStorage.getItem("activityData")
 ) || {
@@ -5,7 +21,6 @@ const defaultActivityData = JSON.parse(
   "meat consumption": 5.0,
   "electricity use": 1.2,
 };
-
 let activities = JSON.parse(localStorage.getItem("activities")) || [];
 let activityTypes =
   JSON.parse(localStorage.getItem("activityTypes")) ||
@@ -17,7 +32,6 @@ let activityCategories = JSON.parse(
   "meat consumption": "food",
   "electricity use": "energy",
 };
-
 const chartColors = [
   "#f87171",
   "#34d399",
@@ -35,7 +49,6 @@ const chartColors = [
   "#e879f9",
   "#10b981",
 ];
-
 const form = document.getElementById("activity-form");
 const co2Input = document.getElementById("activity-co2");
 const activitySelect = document.getElementById("activity");
@@ -52,7 +65,8 @@ const categorySelect = document.getElementById("category-select");
 const newCategoryInput = document.getElementById("new-category");
 const dateInput = document.getElementById("activity-date");
 const activityFilter = document.getElementById("activity-filter");
-
+const userIcon = document.getElementById("user-icon");
+const dropdown = document.getElementById("user-dropdown");
 let chart;
 
 function saveToLocalStorage() {
@@ -71,19 +85,19 @@ function getAllCategories() {
 
 function renderCategorySelect() {
   categorySelect.innerHTML = "";
-  const selectOption = document.createElement("option");
+  let selectOption = document.createElement("option");
   selectOption.value = "";
   selectOption.textContent = "Select Category";
   categorySelect.appendChild(selectOption);
   getAllCategories().forEach((cat) => {
-    const opt = document.createElement("option");
+    let opt = document.createElement("option");
     opt.value = cat;
     opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
     categorySelect.appendChild(opt);
   });
   categoryFilter.innerHTML = `<option value="all">All</option>`;
   getAllCategories().forEach((cat) => {
-    const opt = document.createElement("option");
+    let opt = document.createElement("option");
     opt.value = cat;
     opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
     categoryFilter.appendChild(opt);
@@ -92,20 +106,19 @@ function renderCategorySelect() {
 
 function renderActivitySelect() {
   activitySelect.innerHTML = "";
-  const selectOption = document.createElement("option");
+  let selectOption = document.createElement("option");
   selectOption.value = "";
   selectOption.textContent = "Select";
   activitySelect.appendChild(selectOption);
   activityTypes.forEach((act) => {
-    const option = document.createElement("option");
+    let option = document.createElement("option");
     option.value = act;
     option.textContent = act;
     activitySelect.appendChild(option);
   });
-
   activityFilter.innerHTML = `<option value="all">All</option>`;
   activityTypes.forEach((act) => {
-    const opt = document.createElement("option");
+    let opt = document.createElement("option");
     opt.value = act;
     opt.textContent = act;
     activityFilter.appendChild(opt);
@@ -128,8 +141,8 @@ function renderList() {
   activityList.innerHTML = "";
   if (toggleDetails.checked) {
     filtered.forEach((activity) => {
-      const li = document.createElement("li");
-      const category = activityCategories[activity.activity] || "uncategorized";
+      let li = document.createElement("li");
+      let category = activityCategories[activity.activity] || "uncategorized";
       li.textContent = `${activity.co2} kg - ${activity.activity} (${category}) on ${activity.date}`;
       activityList.appendChild(li);
     });
@@ -151,10 +164,11 @@ function updateChart(data) {
     const allActivities = [...new Set(data.map((a) => a.activity))];
     const datasets = allActivities.map((activity, idx) => {
       const activityData = allDates.map((date) => {
-        const entry = data.find(
+        const entries = data.filter(
           (a) => a.date === date && a.activity === activity
         );
-        return entry ? entry.co2 : 0;
+        const total = entries.reduce((sum, a) => sum + a.co2, 0);
+        return total;
       });
       return {
         label: activity,
@@ -169,7 +183,7 @@ function updateChart(data) {
       data: { labels: allDates, datasets },
       options: {
         responsive: true,
-        maintainAspectRatio: false,
+        maintainAspectRatio: true,
         interaction: { mode: "nearest", axis: "x", intersect: false },
         plugins: { legend: { position: "top" } },
         scales: {
@@ -184,29 +198,31 @@ function updateChart(data) {
     acc[a.activity] = (acc[a.activity] || 0) + a.co2;
     return acc;
   }, {});
-  const activities = Object.keys(activitySums);
+  const acts = Object.keys(activitySums);
   const values = Object.values(activitySums);
   chart = new Chart(chartCanvas.getContext("2d"), {
     type,
     data: {
-      labels: activities,
+      labels: acts,
       datasets: [
         {
           label: "CO₂ by Activity",
           data: values,
-          backgroundColor: chartColors.slice(0, activities.length),
+          backgroundColor: chartColors.slice(0, acts.length),
           borderWidth: 1,
         },
       ],
     },
     options: {
       responsive: true,
+      maintainAspectRatio: true,
       plugins: { legend: { position: "top" } },
+      scales: type === "bar" ? { y: { beginAtZero: true } } : {},
     },
   });
 }
 
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const co2 = parseFloat(co2Input.value);
   const selectedActivity = activitySelect.value;
@@ -226,29 +242,50 @@ form.addEventListener("submit", (e) => {
     activityCategories[activity] = category.toLowerCase();
   }
   defaultActivityData[activity] = co2;
-  activities.push({
-    activity,
-    co2,
-    date: selectedDate || new Date().toISOString().split("T")[0],
-  });
+
+  const date = selectedDate || new Date().toISOString().split("T")[0];
+  const newEntry = { activity, co2, category: category.toLowerCase(), date };
+  activities.push({ activity, co2, date });
   saveToLocalStorage();
   renderActivitySelect();
   renderCategorySelect();
   renderList();
   form.reset();
   setDefaultDate();
+
+  const token = localStorage.getItem("token");
+  if (token) {
+    try {
+      const resp = await fetch(`${API_BASE_URL}/activities/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          activity,
+          co2,
+          category: category.toLowerCase(),
+          date,
+        }),
+      });
+      if (!resp.ok) {
+        console.error("Failed to post to API", resp.status);
+      }
+    } catch (err) {
+      console.error("Network error posting activity", err);
+    }
+  }
 });
 
 activitySelect.addEventListener("change", () => {
   const selected = activitySelect.value;
   co2Input.value = defaultActivityData[selected] || "";
 });
-
 chartTypeSelect.addEventListener("change", renderList);
 toggleDetails.addEventListener("change", renderList);
 categoryFilter.addEventListener("change", renderList);
 activityFilter.addEventListener("change", renderList);
-
 resetButton.addEventListener("click", () => {
   if (confirm("Are you sure you want to reset all data?")) {
     localStorage.clear();
@@ -272,7 +309,47 @@ function setDefaultDate() {
   dateInput.value = today;
 }
 
+userIcon.addEventListener("click", () => {
+  dropdown.style.display =
+    dropdown.style.display === "block" ? "none" : "block";
+});
+document.addEventListener("click", (event) => {
+  if (!userIcon.contains(event.target)) {
+    dropdown.style.display = "none";
+  }
+});
+document.getElementById("logout-btn").addEventListener("click", () => {
+  localStorage.clear();
+  window.location.href = "../home.html";
+});
+
+async function loadFromApi() {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+  try {
+    let resp = await fetch(`${API_BASE_URL}/activities/my`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (resp.ok) {
+      let body = await resp.json();
+      const { logs } = body;
+      activities = logs.map((a) => ({
+        activity: a.activity,
+        co2: a.co2,
+        date: a.date,
+      }));
+      saveToLocalStorage();
+      renderActivitySelect();
+      renderCategorySelect();
+      renderList();
+    }
+  } catch (err) {
+    console.error("Error loading my activities", err);
+  }
+}
+
 renderActivitySelect();
 renderCategorySelect();
 setDefaultDate();
 renderList();
+loadFromApi();
