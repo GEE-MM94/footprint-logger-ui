@@ -1,52 +1,73 @@
+const webpack = require("webpack");
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const Dotenv = require("dotenv-webpack");
+const fs = require("fs");
+
+const dotenv = require("dotenv").config().parsed || {};
+const envKeys = Object.keys(dotenv).reduce((prev, next) => {
+  prev[`process.env.${next}`] = JSON.stringify(dotenv[next]);
+  return prev;
+}, {});
 
 module.exports = (env, argv) => {
-  const isDev = argv.mode === "development";
+  const isProduction = argv.mode === "production";
 
   return {
     entry: {
-      auth: "./static/js/auth.js",
-      public: "./static/js/script.js",
+      app: "./static/js/auth.js",
+      admin: "./static/js/script.js",
     },
     output: {
       filename: "[name].bundle.js",
       path: path.resolve(__dirname, "dist"),
+      publicPath: "",
       clean: true,
-    },
-    mode: isDev ? "development" : "production",
-    devtool: isDev ? "inline-source-map" : false,
-    devServer: {
-      static: "./dist",
-      port: 3000,
-      open: true,
     },
     resolve: {
       fallback: {
-        path: false,
         crypto: require.resolve("crypto-browserify"),
+        os: require.resolve("os-browserify/browser"),
+        path: require.resolve("path-browserify"),
+        buffer: require.resolve("buffer/"),
+        stream: require.resolve("stream-browserify"),
+        vm: require.resolve("vm-browserify"),
       },
     },
     plugins: [
+      new webpack.ProvidePlugin({
+        Buffer: ["buffer", "Buffer"],
+      }),
+      new webpack.DefinePlugin(envKeys),
       new Dotenv(),
+
       new HtmlWebpackPlugin({
-        filename: "index.html",
-        template: "./public/index.html",
-        chunks: ["auth"],
+        filename: "login.html",
+        chunks: ["app"],
+        template: "./public/login.html",
       }),
       new HtmlWebpackPlugin({
-        filename: "public.html",
+        filename: "register.html",
+        chunks: ["app"],
+        template: "./public/register.html",
+      }),
+      new HtmlWebpackPlugin({
+        filename: "app.html",
+        chunks: ["admin"],
         template: "./public/index.html",
-        chunks: ["public"],
       }),
     ],
+    mode: isProduction ? "production" : "development",
+    devtool: isProduction ? false : "source-map",
     module: {
       rules: [
         {
-          test: /\.js$/,
-          exclude: /node_modules/,
-          use: "babel-loader",
+          test: /\.css$/i,
+          use: ["style-loader", "css-loader"],
+        },
+        {
+          test: /\.(png|jpe?g|gif|svg)$/i,
+          type: "asset/resource",
         },
       ],
     },

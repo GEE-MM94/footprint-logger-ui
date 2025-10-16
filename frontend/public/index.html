@@ -7,95 +7,111 @@
     <link rel="stylesheet" href="../static/css/style.css" />
   </head>
   <body>
-    <h1>
-      Daily <span style="color: red"><i>C</i></span
-      ><span style="color: green"><i>O₂</i></span> Emissions Tracker
-    </h1>
+    <div class="app-container">
+      <h1 class="main-title">
+        Daily <span style="color: red"><i>C</i></span
+        ><span style="color: green"><i>O₂</i></span> Emissions Tracker
+      </h1>
 
-    <div class="user-section">
-      <div class="user-icon" id="user-icon">
-        <img
-          src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
-          alt="User Icon"
-        />
-        <span id="username">Username</span>
-        <div class="dropdown" id="user-dropdown">
+      <div class="user-section">
+        <div class="user-icon" id="user-icon">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
+            alt="User Icon"
+          />
+          <span id="username">Username</span>
+        </div>
+        <div class="dropdown" id="user-dropdown" style="display: none">
+          <button id="profile-btn">Profile</button>
+          <button id="settings-btn">Settings</button>
+          <button id="help-btn">Help</button>
           <button id="logout-btn">Logout</button>
         </div>
       </div>
+
+      <form id="activity-form">
+        <div class="form-row">
+          <div>
+            <label for="activity">Activity:</label>
+            <select id="activity"></select>
+          </div>
+          <div>
+            <label for="new-activity">New Activity:</label>
+            <input type="text" id="new-activity" placeholder="New activity" />
+          </div>
+          <div>
+            <label for="activity-co2">CO₂ (kg):</label>
+            <input type="number" step="0.01" id="activity-co2" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label for="category-select">Category:</label>
+            <select id="category-select"></select>
+          </div>
+          <div>
+            <label for="new-category">New Category:</label>
+            <input type="text" id="new-category" placeholder="New category" />
+          </div>
+          <div>
+            <label for="activity-date">Date:</label>
+            <input type="date" id="activity-date" />
+          </div>
+        </div>
+
+        <div class="form-buttons">
+          <button type="submit">Add Activity</button>
+          <button type="button" id="reset-data">Reset All Data</button>
+        </div>
+      </form>
+
+      <div class="controls">
+        <div>
+          <label for="chart-type">Chart Type:</label>
+          <select id="chart-type">
+            <option value="bar">Bar</option>
+            <option value="pie">Pie</option>
+            <option value="line">Line</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="category-filter">Filter by Category:</label>
+          <select id="category-filter">
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="activity-filter">Filter by Activity:</label>
+          <select id="activity-filter">
+            <option value="all">All</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="toggle-details">
+            <input type="checkbox" id="toggle-details" checked /> Show Details
+          </label>
+        </div>
+      </div>
+
+      <div id="total-co2-container">
+        Total CO₂: <span id="total-co2">0.00</span> kg
+      </div>
+
+      <ul id="activity-list"></ul>
+
+      <div class="chart-section">
+        <canvas id="co2-chart"></canvas>
+      </div>
     </div>
-
-    <form id="activity-form">
-      <div>
-        <label for="activity">Activity:</label>
-        <select id="activity"></select>
-        or
-        <input type="text" id="new-activity" placeholder="New activity" />
-      </div>
-      <div>
-        <label for="activity-co2">CO₂ (kg):</label>
-        <input type="number" step="0.01" id="activity-co2" required />
-      </div>
-      <div>
-        <label for="category-select">Category:</label>
-        <select id="category-select"></select>
-        or
-        <input type="text" id="new-category" placeholder="New category" />
-      </div>
-      <div>
-        <label for="activity-date">Date:</label>
-        <input type="date" id="activity-date" />
-      </div>
-      <button type="submit">Add Activity</button>
-      <button type="button" id="reset-data">Reset All Data</button>
-    </form>
-
-    <div class="controls">
-      <div>
-        <label for="chart-type">Chart Type:</label>
-        <select id="chart-type">
-          <option value="bar">Bar</option>
-          <option value="pie">Pie</option>
-          <option value="line">Line</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="toggle-details">
-          <input type="checkbox" id="toggle-details" checked /> Show Details
-        </label>
-      </div>
-
-      <div>
-        <label for="category-filter">Filter by Category:</label>
-        <select id="category-filter">
-          <option value="all">All</option>
-        </select>
-      </div>
-
-      <div>
-        <label for="activity-filter">Filter by Activity:</label>
-        <select id="activity-filter">
-          <option value="all">All</option>
-        </select>
-      </div>
-    </div>
-
-    <div id="total-co2-container">
-      Total CO₂: <span id="total-co2">0.00</span> kg
-    </div>
-
-    <ul id="activity-list"></ul>
-
-    <div class="chart-section">
-      <canvas id="co2-chart"></canvas>
-    </div>
-
     <footer>
       <p>Made by GEE-MM94</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="../static/js/script.js"></script>
+    <script src="admin.bundle.js"></script>
   </body>
 </html>

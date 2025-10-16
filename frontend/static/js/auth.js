@@ -1,4 +1,4 @@
-let authToken = localStorage.getItem("authToken");
+const API_URL = process.env.API_URL;
 
 document.addEventListener("DOMContentLoaded", () => {
   const registerForm = document.getElementById("register-form");
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (res.ok) {
         const data = await res.json();
         localStorage.setItem("token", data.token);
-        window.location.href = "index.html";
+        window.location.href = "app.html";
       } else {
         const err = await res.json();
         document.getElementById("login-error").textContent =
