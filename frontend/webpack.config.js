@@ -2,13 +2,6 @@ const webpack = require("webpack");
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const Dotenv = require("dotenv-webpack");
-const fs = require("fs");
-
-const dotenv = require("dotenv").config().parsed || {};
-const envKeys = Object.keys(dotenv).reduce((prev, next) => {
-  prev[`process.env.${next}`] = JSON.stringify(dotenv[next]);
-  return prev;
-}, {});
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
@@ -38,9 +31,10 @@ module.exports = (env, argv) => {
       new webpack.ProvidePlugin({
         Buffer: ["buffer", "Buffer"],
       }),
-      new webpack.DefinePlugin(envKeys),
-      new Dotenv(),
-
+      new Dotenv({
+        systemvars: true,
+        silent: true,
+      }),
       new HtmlWebpackPlugin({
         filename: "login.html",
         chunks: ["app"],
@@ -57,6 +51,7 @@ module.exports = (env, argv) => {
         template: "./public/index.html",
       }),
     ],
+
     mode: isProduction ? "production" : "development",
     devtool: isProduction ? false : "source-map",
     module: {
