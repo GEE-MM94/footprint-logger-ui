@@ -30,6 +30,7 @@ body {
   cursor: pointer;
   color: #ffffff;
   transition: background-color 0.2s;
+  font-size: 1.2rem;
 }
 
 .user-navbar button:hover {
@@ -90,9 +91,11 @@ s .chart-section {
 
 #username {
   display: block;
-  font-size: 0.9em;
+  font-size: 1.2rem;
   margin-top: 5px;
-  color: #333;
+  color: #04172f;
+  font-size: 1.5rem;
+  padding-bottom: 5%;
 }
 
 .dropdown {
