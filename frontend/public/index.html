@@ -21,12 +21,13 @@
           />
           <span id="username">Username</span>
         </div>
-        <div class="dropdown" id="user-dropdown" style="display: none">
-          <button id="profile-btn">Profile</button>
-          <button id="settings-btn">Settings</button>
-          <button id="help-btn">Help</button>
-          <button id="logout-btn">Logout</button>
-        </div>
+
+        <nav class="user-navbar">
+          <button id="avg-btn">average-emissions</button>
+          <button id="week-btn">weekly-summary</button>
+          <button id="leader-btn">leaderboard</button>
+          <button id="profile-btn">logout</button>
+        </nav>
       </div>
 
       <form id="activity-form">
@@ -95,11 +96,24 @@
             <input type="checkbox" id="toggle-details" checked /> Show Details
           </label>
         </div>
+
+        <div>
+          <label for="toggle-chart">
+            <input type="checkbox" id="toggle-chart" checked /> Show Chart
+          </label>
+        </div>
       </div>
 
       <div id="total-co2-container">
         Total CO₂: <span id="total-co2">0.00</span> kg
       </div>
+
+      <section id="report-section" class="hidden">
+        <div class="report-header">
+          <h2 id="report-title"></h2>
+        </div>
+        <pre id="report-content"></pre>
+      </section>
 
       <ul id="activity-list"></ul>
 
@@ -107,6 +121,17 @@
         <canvas id="co2-chart"></canvas>
       </div>
     </div>
+
+    <div id="profile-modal" class="modal hidden">
+      <div class="modal-content">
+        <p id="profile-details"></p>
+        <div class="modal-actions">
+          <button id="logout-btn">Logout</button>
+          <button id="close-modal">Close</button>
+        </div>
+      </div>
+    </div>
+
     <footer>
       <p>Made by GEE-MM94</p>
     </footer>

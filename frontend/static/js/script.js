@@ -17,6 +17,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const newCategoryInput = document.getElementById("new-category");
   const dateInput = document.getElementById("activity-date");
   const activityFilter = document.getElementById("activity-filter");
+  const toggleChart = document.getElementById("toggle-chart");
+  const chartSection = document.querySelector(".chart-section");
+  const profileDetails = document.getElementById("profile-details");
+  const avgBtn = document.getElementById("avg-btn");
+  const weekBtn = document.getElementById("week-btn");
+  const leaderBtn = document.getElementById("leader-btn");
+  const profileBtn = document.getElementById("profile-btn");
+  const reportSection = document.getElementById("report-section");
+  const reportTitle = document.getElementById("report-title");
+  const reportContent = document.getElementById("report-content");
+
   const userIcon = document.getElementById("user-icon");
   const dropdown = document.getElementById("user-dropdown");
   const logoutBtn = document.getElementById("logout-btn");
@@ -74,6 +85,16 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch {
       return null;
     }
+  }
+
+  if (toggleChart && chartSection) {
+    toggleChart.addEventListener("change", () => {
+      if (toggleChart.checked) {
+        chartSection.classList.remove("hidden");
+      } else {
+        chartSection.classList.add("hidden");
+      }
+    });
   }
 
   function updateUserInfo() {
@@ -188,6 +209,15 @@ document.addEventListener("DOMContentLoaded", () => {
     updateChart(filtered);
   }
 
+  function showReport(title, content) {
+    reportTitle.textContent = title;
+    reportContent.textContent = content;
+    reportSection.classList.remove("hidden");
+    form.classList.add("hidden");
+    toggleChart.checked = false;
+    toggleChart.dispatchEvent(new Event("change"));
+  }
+
   function updateChart(data) {
     const type = chartTypeSelect?.value || "bar";
     if (chart) chart.destroy();
@@ -265,55 +295,114 @@ document.addEventListener("DOMContentLoaded", () => {
     return data.reduce((sum, item) => sum + item.co2, 0).toFixed(2);
   }
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const co2 = parseFloat(co2Input.value);
-    const selectedActivity = activitySelect.value;
-    const newActivity = newActivityInput.value.trim();
-    const selectedCategory = categorySelect.value;
-    const newCategory = newCategoryInput.value.trim();
-    const activity = newActivity || selectedActivity;
-    const category = newCategory || selectedCategory;
-    const date = dateInput.value || new Date().toISOString().split("T")[0];
+  if (!window.formSubmitListenerAdded) {
+    window.formSubmitListenerAdded = true;
 
-    if (!activity || !category) return alert("Select activity and category.");
-    if (isNaN(co2)) return alert("Enter a valid CO₂ value.");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    if (!activityTypes.includes(activity)) {
-      activityTypes.push(activity);
-    }
+      const co2 = parseFloat(co2Input.value);
+      const selectedActivity = activitySelect.value.trim();
+      const newActivity = newActivityInput.value.trim();
+      const selectedCategory = categorySelect.value.trim();
+      const newCategory = newCategoryInput.value.trim();
+      const date = dateInput.value || new Date().toISOString().split("T")[0];
 
-    activityCategories[activity] = category.toLowerCase();
-    defaultActivityData[activity] = co2;
-    activities.push({ activity, co2, date });
+      const activity = newActivity !== "" ? newActivity : selectedActivity;
+      const category = newCategory !== "" ? newCategory : selectedCategory;
 
-    saveToLocalStorage();
-    renderActivitySelect();
-    renderCategorySelect();
-    renderList();
-    form.reset();
-    setDefaultDate();
+      if (!activity || activity === "Select...")
+        return alert("Please enter or select a valid activity.");
+      if (!category || category === "Select...")
+        return alert("Please enter or select a valid category.");
+      if (isNaN(co2)) return alert("Please enter a valid CO₂ value.");
 
-    const token = getToken();
-    if (token) {
-      try {
-        const resp = await fetch(`${API_BASE_URL}/activities/add`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            activity,
-            co2,
-            category: category.toLowerCase(),
-            date,
-          }),
-        });
-        if (!resp.ok) console.error("Failed to post activity", resp.status);
-      } catch (err) {
-        console.error("Network error", err);
+      if (!activityTypes.includes(activity)) activityTypes.push(activity);
+
+      activityCategories[activity] = category.toLowerCase();
+      defaultActivityData[activity] = co2;
+      activities.push({ activity, co2, date });
+
+      saveToLocalStorage();
+      renderActivitySelect();
+      renderCategorySelect();
+      renderList();
+      form.reset();
+      setDefaultDate();
+
+      const token = getToken();
+      if (token) {
+        try {
+          const resp = await fetch(`${API_BASE_URL}/activities/add`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              activity,
+              co2,
+              category: category.toLowerCase(),
+              date,
+            }),
+          });
+
+          if (!resp.ok) console.error("Failed to post activity", resp.status);
+        } catch (err) {
+          console.error("Network error", err);
+        }
       }
+    });
+  }
+
+  avgBtn?.addEventListener("click", async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/activities/average-emissions`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      showReport("Average CO₂ Emissions", `${data.average} kg`);
+    } catch {
+      alert("Error fetching average emissions");
+    }
+  });
+
+  weekBtn?.addEventListener("click", async () => {
+    const token = getToken();
+    if (!token) return alert("Please log in");
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/activities/weekly-summary`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+
+      const summary = Object.entries(data.daily)
+        .map(([date, co2]) => `${date}: ${co2.toFixed(2)} kg`)
+        .join("\n");
+
+      showReport("Weekly CO₂ Summary", summary);
+    } catch {
+      alert("Error fetching weekly summary");
+    }
+  });
+
+  leaderBtn?.addEventListener("click", async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/activities/leaderboard`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+
+      const leaderboard = data.leaderboard
+        .map(
+          ({ username, total }, index) =>
+            `#${index + 1} - ${username} has only used  ${total} kg`
+        )
+        .join("\n\n\n");
+
+      showReport("Leaderboard (Lowest CO₂)", leaderboard);
+    } catch {
+      alert("Error fetching leaderboard");
     }
   });
 
@@ -350,25 +439,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (dateInput) dateInput.value = today;
   }
 
-  if (userIcon && dropdown) {
-    userIcon.addEventListener("click", (e) => {
-      e.stopPropagation();
-      dropdown.style.display =
-        dropdown.style.display === "block" ? "none" : "block";
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!dropdown.contains(e.target) && !userIcon.contains(e.target)) {
-        dropdown.style.display = "none";
-      }
-    });
-  }
-
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      localStorage.clear();
-      window.location.href = "../public/home.html";
-    });
+  function logout() {
+    localStorage.clear();
+    window.location.href = "../public/home.html";
   }
 
   async function loadFromApi() {
@@ -395,6 +468,27 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error loading activities", err);
     }
   }
+
+  profileBtn?.addEventListener("click", () => {
+    const token = getToken();
+    const user = token ? parseJwt(token) : null;
+
+    if (user) {
+      const modal = document.getElementById("profile-modal");
+      profileDetails.textContent = `Are you sure you want to log out ${user.username} ?`;
+      modal.classList.remove("hidden");
+    } else {
+      alert("You are not logged in.");
+    }
+  });
+
+  document.getElementById("logout-btn").addEventListener("click", () => {
+    logout();
+  });
+
+  document.getElementById("close-modal").addEventListener("click", () => {
+    document.getElementById("profile-modal").classList.add("hidden");
+  });
 
   renderActivitySelect();
   renderCategorySelect();

@@ -6,8 +6,6 @@ const { connectDB } = require("./models/db");
 
 async function start() {
   const db = await connectDB();
-  const users = await db.collection("users").find().toArray();
-  console.log(users);
 }
 
 start();

@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const { connectDB } = require("../models/db");
+const { ObjectId } = require("mongodb");
 
 const router = express.Router();
 
@@ -106,7 +107,7 @@ router.get("/activities/average-emissions", async (req, res) => {
 
   try {
     const allLogs = await activitiesCollection.find().toArray();
-
+    console.log("nazo :", allLogs);
     const userMap = {};
     allLogs.forEach(({ userId, co2 }) => {
       userMap[userId] = (userMap[userId] || 0) + co2;
@@ -129,21 +130,34 @@ router.get("/activities/leaderboard", async (req, res) => {
   try {
     const allLogs = await activitiesCollection.find().toArray();
 
-    const userMap = {};
+    const userTotals = {};
     allLogs.forEach(({ userId, co2 }) => {
-      userMap[userId] = (userMap[userId] || 0) + co2;
+      userTotals[userId] = (userTotals[userId] || 0) + co2;
     });
 
-    const sorted = Object.entries(userMap)
+    const sorted = Object.entries(userTotals)
       .sort((a, b) => a[1] - b[1])
       .slice(0, 10);
 
-    res.json({
-      leaderboard: sorted.map(([userId, total]) => ({
-        userId,
-        total: total.toFixed(2),
-      })),
+    const db = await connectDB();
+    const usersCollection = db.collection("users");
+
+    const userIds = sorted.map(([userId]) => new ObjectId(userId));
+    const users = await usersCollection
+      .find({ _id: { $in: userIds } })
+      .toArray();
+
+    const usernameMap = {};
+    users.forEach((u) => {
+      usernameMap[u._id.toString()] = u.username;
     });
+
+    const leaderboard = sorted.map(([userId, total]) => ({
+      username: usernameMap[userId] || "Unknown",
+      total: total.toFixed(2),
+    }));
+
+    res.json({ leaderboard });
   } catch (err) {
     console.error("Error building leaderboard:", err);
     res.status(500).json({ message: "Error building leaderboard" });
