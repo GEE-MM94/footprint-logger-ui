@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const API_BASE_URL = process.env.API_BASE_URL;
+  const API_BASE_URL = `${process.env.API_BASE_URL}/api/activity`;
 
   const form = document.getElementById("activity-form");
   const co2Input = document.getElementById("activity-co2");

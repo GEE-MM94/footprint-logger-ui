@@ -1,4 +1,4 @@
-const API_URL = process.env.API_URL;
+const API_URL = `${process.env.API_BASE_URL}/api`;
 
 document.addEventListener("DOMContentLoaded", () => {
   const registerForm = document.getElementById("register-form");

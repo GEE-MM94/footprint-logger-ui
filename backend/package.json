@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "set NODE_OPTIONS=--tls-min-v1.2 && node app.js"
+    "start": "node app.js",
+    "install-all": "npm install"
   },
   "repository": {
     "type": "git",

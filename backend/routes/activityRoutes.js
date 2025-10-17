@@ -107,7 +107,6 @@ router.get("/activities/average-emissions", async (req, res) => {
 
   try {
     const allLogs = await activitiesCollection.find().toArray();
-    console.log("nazo :", allLogs);
     const userMap = {};
     allLogs.forEach(({ userId, co2 }) => {
       userMap[userId] = (userMap[userId] || 0) + co2;
