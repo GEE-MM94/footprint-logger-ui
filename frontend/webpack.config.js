@@ -34,6 +34,7 @@ module.exports = (env, argv) => {
       new Dotenv({
         systemvars: true,
         silent: true,
+        ignoreStub: true,
       }),
       new HtmlWebpackPlugin({
         filename: "login.html",
