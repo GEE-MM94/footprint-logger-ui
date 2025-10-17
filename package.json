@@ -6,7 +6,7 @@
     "install-frontend": "cd frontend && npm install",
     "install-backend": "cd backend && npm install",
     "build": "cd frontend && npm run build",
-    "start": "npx npm-run-all build start-servers",
+    "start": "npm run start-servers",
     "start-servers": "npx concurrently \"npm run start-backend\" \"npm run start-frontend\"",
     "start-frontend": "cd frontend && npm start",
     "start-backend": "cd backend && npm start"
