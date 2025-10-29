@@ -1,60 +1,59 @@
-#🌱 footprint-logger-ui
+# 🌱 Footprint Logger UI
 
-A full-stack web application that helps users track, analyze, and reduce their daily carbon emissions.
-Built for a local environmental initiative to encourage sustainable habits through data-driven insights, weekly goals, and real-time feedback.
+A full-stack web application that helps users **track, analyze, and reduce their daily carbon emissions**.  
+Built for a local environmental initiative to encourage sustainable habits through **data-driven insights**, **weekly goals**, and **real-time feedback**.
 
-#🚀 Features
-#🧾 Activity Tracking
+---
 
-Log daily activities (e.g., car travel, meat consumption, electricity use)
+## 🚀 Features
 
-Automatically assigns estimated CO₂ emission values
+### 🧾 Activity Tracking
 
-Filter by category: Food, Transport, Energy
+- Log daily activities (e.g., car travel, meat consumption, electricity use)
+- Automatically assigns estimated CO₂ emission values
+- Filter by category: **Food**, **Transport**, **Energy**
+- Persistent user sessions via **localStorage** and backend **API**
 
-Persistent user sessions via localStorage and backend API
+### 💡 Insight Engine
 
-#💡 Insight Engine
+- Analyzes user activity logs on login or weekly
+- Identifies your **highest-emission category**
+- Tracks **weekly reduction goals**
 
-Analyzes user activity logs on login or weekly
+### 📊 Visualization
 
-Identifies your highest-emission category
+- Displays emissions data using **bar** or **pie charts** (powered by Chart.js)
+- “Weekly Goal” section updates dynamically as users log new activities
 
-Tracks weekly reduction goals
+---
 
-#📊 Visualization
+## 🧩 Tech Stack
 
-Displays emissions data via bar or pie charts (using Chart.js)
+| Layer          | Technology                                           |
+| -------------- | ---------------------------------------------------- |
+| **Frontend**   | HTML, CSS, JavaScript, Webpack                       |
+| **Backend**    | Node.js, Express.js                                  |
+| **Real-time**  | Socket.io (WebSockets)                               |
+| **Database**   | Lightweight JSON or file-based (via `/models/db.js`) |
+| **Charts**     | Chart.js                                             |
+| **Auth**       | Basic login/register with JWT or session cookies     |
+| **Dev Tools**  | concurrently, npm-run-all                            |
+| **Deployment** | Render (Free Tier)                                   |
 
-“Weekly Goal” section updates dynamically as user logs new activities
+---
 
-#🧩 Tech Stack
-Layer	Technology
-Frontend	HTML, CSS, JavaScript, Webpack
-Backend	Node.js, Express.js
-Real-time	Socket.io (WebSockets)
-Database	Lightweight file-based or JSON (via /models/db.js)
-Charts	Chart.js
-Auth	Basic login/register with JWT or session cookies
-Dev Tools	concurrently, npm-run-all
-Deployment	Render (Free Tier)
+## ⚙️ Installation & Local Development
 
-#⚙️ Installation & Local Development
+### 1. Clone the repository
 
-### Clone the repository
-git clone 
-cd to main dir
+```bash
+git clone <repository-url>
+cd footprint-logger-ui
+```
 
-### Install all dependencies
+### 3. Environment Setup
 
-## At the project root (not inside frontend/backend):
-
-npm install
-This will install dependencies in both frontend/ and backend/ via npm-run-all.
-
-### Environment Setup
-
-Create .env files in both folders:
+Create two .env files — one for the frontend and one for the backend.
 
 frontend/.env
 BACKEND_URL=http://localhost:5000
@@ -63,35 +62,6 @@ backend/.env
 PORT=5000
 JWT_SECRET=your-secret-key
 
-### Run the app locally
-npm start
-
-Default ports:
-
-Frontend → http://localhost:3000
-
-Backend → http://localhost:5000
-
-#🧠 Insight Engine Logic
-
-The backend (backend/app.js) handles:
-
-User authentication (register/login)
-
-Activity logging via activityRoutes.js
-
-Emission analysis (sum by category)
-
-Weekly insight generation and real-time updates via Socket.io
-
-When a user logs in:
-
-The backend identifies their highest emission source
-
-Generates a personalized goal or tip
-
-Sends it via WebSocket to update the frontend dashboard
-
 ### Build Command:
 
 npm install && npm run build
@@ -99,13 +69,6 @@ npm install && npm run build
 ### Start Command:
 
 npm start
-
-### Environment → Add Environment Variable:
-
-Key	Example Value
-PORT	5000
-BACKEND_URL http://localhost:5000
-JWT_SECRET	your-secret-key
 
 #👨‍💻 Author
 
