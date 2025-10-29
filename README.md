@@ -39,52 +39,17 @@ Auth	Basic login/register with JWT or session cookies
 Dev Tools	concurrently, npm-run-all
 Deployment	Render (Free Tier)
 
-#🗂️ Project Structure
-project-root/
-│
-├── frontend/
-│   ├── static/
-│   │   ├── js/
-│   │   │   ├── auth.js
-│   │   │   └── script.js
-│   │   └── css/
-│   │       ├── login.css
-│   │       ├── register.css
-│   │       └── script.css
-│   ├── public/
-│   │   ├── login.html
-│   │   ├── register.html
-│   │   ├── index.html
-│   │   └── home.html
-│   ├── dist/                    # Webpack output
-│   ├── webpack.config.js
-│   ├── .env
-│   └── package.json
-│
-├── backend/
-│   ├── app.js                   # Express + Socket.io entry point
-│   ├── routes/
-│   │   ├── authRoutes.js
-│   │   └── activityRoutes.js
-│   ├── models/
-│   │   └── db.js                # Local DB or data handler
-│   ├── .env
-│   └── package.json
-│
-├── package.json                 # Root runner (uses concurrently + npm-run-all)
-└── README.md
-
 #⚙️ Installation & Local Development
+
 ### Clone the repository
-git clone https://github.com/your-username/carbon-tracker.git
-cd carbon-tracker
+git clone 
+cd to main dir
 
 ### Install all dependencies
 
-At the project root (not inside frontend/backend):
+## At the project root (not inside frontend/backend):
 
 npm install
-
 This will install dependencies in both frontend/ and backend/ via npm-run-all.
 
 ### Environment Setup
@@ -100,13 +65,6 @@ JWT_SECRET=your-secret-key
 
 ### Run the app locally
 npm start
-
-
-This will:
-
-Run the frontend build via Webpack
-
-Start both the frontend and backend concurrently
 
 Default ports:
 
@@ -137,7 +95,6 @@ Sends it via WebSocket to update the frontend dashboard
 ### Build Command:
 
 npm install && npm run build
-
 
 ### Start Command:
 
