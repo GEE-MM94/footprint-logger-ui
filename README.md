@@ -82,7 +82,7 @@ npm install && npm run build
 npm start
 ```
 
-#👨‍💻 Author
+# 👨‍💻 Author
 
 Developed by GEE-MM94 for a local environmental organization 🌿
 Helping individuals make data-driven, sustainable choices.
