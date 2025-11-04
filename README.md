@@ -55,13 +55,13 @@ cd footprint-logger-ui
 
 Create two .env files — one for the frontend and one for the backend.
 
-####frontend/.env
+#### frontend/.env
 
 ```
 BACKEND_URL=http://localhost:5000
 ```
 
-####backend/.env
+#### backend/.env
 
 ```
 MONGO_URI=""
