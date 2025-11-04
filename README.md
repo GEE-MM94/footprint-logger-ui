@@ -47,7 +47,7 @@ Built for a local environmental initiative to encourage sustainable habits throu
 ### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/GEE-MM94/footprint-logger-ui.git
 cd footprint-logger-ui
 ```
 
@@ -55,20 +55,26 @@ cd footprint-logger-ui
 
 Create two .env files — one for the frontend and one for the backend.
 
+```
 frontend/.env
 BACKEND_URL=http://localhost:5000
 
 backend/.env
 PORT=5000
 JWT_SECRET=your-secret-key
+```
 
 ### Build Command:
 
+```
 npm install && npm run build
+```
 
 ### Start Command:
 
+```
 npm start
+```
 
 #👨‍💻 Author
 
